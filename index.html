@@ -1,74 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Calculator</title>
+    <title>Python Calculator</title>
 
-    <style>
-        body {
-            font-family: Arial;
-            background: #eee8f5;
-            text-align: center;
-            padding-top: 100px;
-        }
+    <link rel="stylesheet"
+          href="https://pyscript.net/releases/2024.1.1/core.css">
 
-        .calculator {
-            background: white;
-            width: 300px;
-            margin: auto;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px #ccc;
-        }
-
-        input, select, button {
-            width: 90%;
-            padding: 12px;
-            margin: 10px;
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        button {
-            background: #9678d3;
-            color: white;
-            cursor: pointer;
-        }
-
-        h2 {
-            color: #7655b5;
-        }
-    </style>
+    <script type="module"
+          src="https://pyscript.net/releases/2024.1.1/core.js">
+    </script>
 </head>
 
 <body>
+    <h1>Python Calculator</h1>
 
-    <div class="calculator">
-        <h1>Calculator</h1>
+    <input id="num1" type="number">
 
-        <form method="POST">
+    <select id="operation">
+        <option value="+">+</option>
+        <option value="-">-</option>
+        <option value="*">×</option>
+        <option value="/">÷</option>
+    </select>
 
-            <input type="number" name="num1"
-                   placeholder="First number"
-                   step="any" required>
+    <input id="num2" type="number">
 
-            <select name="operation">
-                <option value="+">Addition (+)</option>
-                <option value="-">Subtraction (-)</option>
-                <option value="*">Multiplication (×)</option>
-                <option value="/">Division (÷)</option>
-            </select>
+    <button py-click="calculate">Calculate</button>
 
-            <input type="number" name="num2"
-                   placeholder="Second number"
-                   step="any" required>
+    <h2 id="result"></h2>
 
-            <button type="submit">Calculate</button>
+    <script type="py">
+        from pyscript import document
 
-        </form>
+        def calculate(event):
+            try:
+                a = float(document.querySelector("#num1").value)
+                b = float(document.querySelector("#num2").value)
+                op = document.querySelector("#operation").value
 
-        <h2>Result: {{ result }}</h2>
-    </div>
+                if op == "+":
+                    result = a + b
+                elif op == "-":
+                    result = a - b
+                elif op == "*":
+                    result = a * b
+                elif op == "/":
+                    result = a / b
 
+            except ZeroDivisionError:
+                result = "Cannot divide by zero"
+
+            except ValueError:
+                result = "Enter valid numbers"
+
+            document.querySelector("#result").innerText = str(result)
+    </script>
 </body>
 </html>
