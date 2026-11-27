@@ -1,59 +1,288 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Python Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Floating Calculator</title>
 
     <link rel="stylesheet"
           href="https://pyscript.net/releases/2024.1.1/core.css">
 
     <script type="module"
-          src="https://pyscript.net/releases/2024.1.1/core.js">
+            src="https://pyscript.net/releases/2024.1.1/core.js">
     </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(
+                135deg, #f3eafc, #d5d7eb
+            );
+            font-family: Arial, sans-serif;
+        }
+
+        .calculator {
+            width: 310px;
+            padding: 24px;
+            border-radius: 30px;
+            background: linear-gradient(
+                145deg, #faf8f6, #e3dfdc
+            );
+
+            box-shadow:
+                0 9px 0 #b9b3b5,
+                0 35px 50px #6c62745c,
+                inset 0 2px 3px white;
+
+            animation: floating 4s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        .brand {
+            display: flex;
+            justify-content: space-between;
+            color: #888;
+            font-size: 11px;
+            letter-spacing: 3px;
+            margin-bottom: 18px;
+        }
+
+        #display {
+            background: #c9d3bd;
+            border: 5px solid #bcbab6;
+            border-radius: 10px;
+            padding: 25px 12px;
+            text-align: right;
+            font-family: monospace;
+            font-size: 32px;
+            color: #354334;
+            overflow: hidden;
+            box-shadow: inset 0 3px 8px #0003;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button {
+            height: 52px;
+            border: none;
+            border-radius: 12px;
+            background: #f9f7f5;
+            color: #45404b;
+            font-size: 20px;
+            cursor: pointer;
+
+            box-shadow:
+                0 4px 0 #aaa5ad,
+                0 6px 7px #0002;
+
+            transition: 0.1s;
+        }
+
+        button:hover {
+            filter: brightness(0.96);
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #aaa5ad;
+        }
+
+        .operator {
+            background: #c7b9e1;
+        }
+
+        .utility {
+            background: #c8c6c7;
+        }
+
+        .equal {
+            background: #9a88c5;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: #999;
+            margin-top: 24px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .calculator {
+                animation: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Python Calculator</h1>
 
-    <input id="num1" type="number">
+    <div class="calculator">
 
-    <select id="operation">
-        <option value="+">+</option>
-        <option value="-">-</option>
-        <option value="*">×</option>
-        <option value="/">÷</option>
-    </select>
+        <div class="brand">
+            <span>STUDIO</span>
+            <span>CAL-01</span>
+        </div>
 
-    <input id="num2" type="number">
+        <div id="display">0</div>
 
-    <button py-click="calculate">Calculate</button>
+        <div class="buttons">
 
-    <h2 id="result"></h2>
+            <button class="utility" py-click="press">AC</button>
+            <button class="utility" py-click="press">±</button>
+            <button class="utility" py-click="press">%</button>
+            <button class="operator" py-click="press">÷</button>
+
+            <button py-click="press">7</button>
+            <button py-click="press">8</button>
+            <button py-click="press">9</button>
+            <button class="operator" py-click="press">×</button>
+
+            <button py-click="press">4</button>
+            <button py-click="press">5</button>
+            <button py-click="press">6</button>
+            <button class="operator" py-click="press">−</button>
+
+            <button py-click="press">1</button>
+            <button py-click="press">2</button>
+            <button py-click="press">3</button>
+            <button class="operator" py-click="press">+</button>
+
+            <button py-click="press">0</button>
+            <button py-click="press">.</button>
+            <button class="utility" py-click="press">DEL</button>
+            <button class="equal" py-click="press">=</button>
+
+        </div>
+
+        <div class="footer">
+            DIGITAL CALCULATOR
+        </div>
+
+    </div>
 
     <script type="py">
         from pyscript import document
 
-        def calculate(event):
+        current = "0"
+        previous = None
+        operator = None
+        reset = False
+
+        def calculate():
+            global current, previous, operator, reset
+
+            if previous is None or operator is None:
+                return
+
+            a = previous
+            b = float(current)
+
+            if operator == "+":
+                result = a + b
+
+            elif operator == "−":
+                result = a - b
+
+            elif operator == "×":
+                result = a * b
+
+            elif operator == "÷":
+                result = a / b
+
+            current = format(result, ".10g")
+            previous = None
+            operator = None
+            reset = True
+
+        def press(event):
+            global current, previous, operator, reset
+
+            key = event.target.innerText.strip()
+
             try:
-                a = float(document.querySelector("#num1").value)
-                b = float(document.querySelector("#num2").value)
-                op = document.querySelector("#operation").value
 
-                if op == "+":
-                    result = a + b
-                elif op == "-":
-                    result = a - b
-                elif op == "*":
-                    result = a * b
-                elif op == "/":
-                    result = a / b
+                if key == "AC":
+                    current = "0"
+                    previous = None
+                    operator = None
+                    reset = False
 
-            except ZeroDivisionError:
-                result = "Cannot divide by zero"
+                elif key == "DEL":
+                    current = current[:-1]
 
-            except ValueError:
-                result = "Enter valid numbers"
+                    if current in ["", "-"]:
+                        current = "0"
 
-            document.querySelector("#result").innerText = str(result)
+                elif key == "±":
+                    current = format(-float(current), ".10g")
+
+                elif key == "%":
+                    current = format(float(current) / 100, ".10g")
+
+                elif key in ["+", "−", "×", "÷"]:
+
+                    if operator is not None and not reset:
+                        calculate()
+
+                    previous = float(current)
+                    operator = key
+                    reset = True
+
+                elif key == "=":
+                    calculate()
+
+                else:
+
+                    if reset or current == "Error":
+                        current = "0"
+                        reset = False
+
+                    if key == ".":
+                        if "." not in current:
+                            current += "."
+
+                    elif current == "0":
+                        current = key
+
+                    elif len(current) < 12:
+                        current += key
+
+            except (ZeroDivisionError, ValueError, OverflowError):
+                current = "Error"
+                previous = None
+                operator = None
+                reset = True
+
+            document.querySelector("#display").innerText = current
+
     </script>
+
 </body>
 </html>
