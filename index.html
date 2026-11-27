@@ -1,248 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simple Calculator</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      font-family: Inter, Arial, sans-serif;
-      background: linear-gradient(135deg, #dce7f7, #f7e8ef);
-      color: #202436;
-    }
-    .calculator {
-      width: min(360px, 92vw);
-      padding: 24px;
-      border-radius: 28px;
-      background: rgba(255,255,255,.82);
-      box-shadow: 0 24px 60px rgba(48, 54, 88, .18);
-      backdrop-filter: blur(12px);
-    }
-    .topline {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      color: #81879a;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-    .display {
-      min-height: 112px;
-      padding: 18px 8px 22px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: flex-end;
-      overflow: hidden;
-    }
-    #previous {
-      min-height: 22px;
-      color: #9298a9;
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-    #current {
-      width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: right;
-      white-space: nowrap;
-      font-size: clamp(34px, 10vw, 48px);
-      font-weight: 600;
-    }
-    .keys {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-    button {
-      border: 0;
-      min-height: 62px;
-      border-radius: 18px;
-      background: #f0f2f8;
-      color: #30364a;
-      font: inherit;
-      font-size: 20px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform .12s, filter .12s, background .12s;
-    }
-    button:hover { filter: brightness(.97); }
-    button:active { transform: scale(.95); }
-    .utility { background: #e5e9f3; color: #626b82; }
-    .operator { background: #e8e4fb; color: #6e5bd0; }
-    .equals {
-      background: #7867df;
-      color: white;
-      box-shadow: 0 8px 18px rgba(120,103,223,.25);
-    }
-    .zero { grid-column: span 2; }
-    .hint {
-      text-align: center;
-      color: #9aa0af;
-      font-size: 11px;
-      margin: 18px 0 0;
-    }
-  </style>
+    <title>Calculator</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #eee8f5;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        .calculator {
+            background: white;
+            width: 300px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px #ccc;
+        }
+
+        input, select, button {
+            width: 90%;
+            padding: 12px;
+            margin: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        button {
+            background: #9678d3;
+            color: white;
+            cursor: pointer;
+        }
+
+        h2 {
+            color: #7655b5;
+        }
+    </style>
 </head>
+
 <body>
-  <main class="calculator">
-    <div class="topline">
-      <span>Calculator</span>
-      <span>Basic · 01</span>
+
+    <div class="calculator">
+        <h1>Calculator</h1>
+
+        <form method="POST">
+
+            <input type="number" name="num1"
+                   placeholder="First number"
+                   step="any" required>
+
+            <select name="operation">
+                <option value="+">Addition (+)</option>
+                <option value="-">Subtraction (-)</option>
+                <option value="*">Multiplication (×)</option>
+                <option value="/">Division (÷)</option>
+            </select>
+
+            <input type="number" name="num2"
+                   placeholder="Second number"
+                   step="any" required>
+
+            <button type="submit">Calculate</button>
+
+        </form>
+
+        <h2>Result: {{ result }}</h2>
     </div>
 
-    <section class="display" aria-live="polite">
-      <div id="previous"></div>
-      <div id="current">0</div>
-    </section>
-
-    <section class="keys">
-      <button class="utility" data-action="clear">AC</button>
-      <button class="utility" data-action="delete">DEL</button>
-      <button class="utility" data-action="percent">%</button>
-      <button class="operator" data-operator="÷">÷</button>
-
-      <button data-number="7">7</button>
-      <button data-number="8">8</button>
-      <button data-number="9">9</button>
-      <button class="operator" data-operator="×">×</button>
-
-      <button data-number="4">4</button>
-      <button data-number="5">5</button>
-      <button data-number="6">6</button>
-      <button class="operator" data-operator="−">−</button>
-
-      <button data-number="1">1</button>
-      <button data-number="2">2</button>
-      <button data-number="3">3</button>
-      <button class="operator" data-operator="+">+</button>
-
-      <button class="utility" data-action="sign">±</button>
-      <button class="zero" data-number="0">0</button>
-      <button data-action="decimal">.</button>
-      <button class="equals" data-action="equals">=</button>
-    </section>
-    <p class="hint">You can also use your keyboard</p>
-  </main>
-
-  <script>
-    const currentEl = document.getElementById("current");
-    const previousEl = document.getElementById("previous");
-
-    let current = "0";
-    let previous = "";
-    let operator = null;
-    let shouldReset = false;
-
-    function updateDisplay() {
-      currentEl.textContent = current;
-      previousEl.textContent = previous;
-    }
-
-    function addNumber(number) {
-      if (current === "Error" || shouldReset) {
-        current = number;
-        shouldReset = false;
-      } else {
-        current = current === "0" ? number : current + number;
-      }
-      updateDisplay();
-    }
-
-    function addDecimal() {
-      if (shouldReset || current === "Error") {
-        current = "0";
-        shouldReset = false;
-      }
-      if (!current.includes(".")) current += ".";
-      updateDisplay();
-    }
-
-    function chooseOperator(nextOperator) {
-      if (current === "Error") return;
-      if (operator && !shouldReset) calculate();
-      previous = current;
-      operator = nextOperator;
-      shouldReset = true;
-      updateDisplay();
-    }
-
-    function calculate() {
-      if (!operator || shouldReset) return;
-      const a = Number(previous);
-      const b = Number(current);
-      let result;
-
-      switch (operator) {
-        case "+": result = a + b; break;
-        case "−": result = a - b; break;
-        case "×": result = a * b; break;
-        case "÷": result = b === 0 ? NaN : a / b; break;
-      }
-
-      current = Number.isFinite(result)
-        ? String(Number(result.toPrecision(10)))
-        : "Error";
-      previous = "";
-      operator = null;
-      shouldReset = true;
-      updateDisplay();
-    }
-
-    function handleAction(action) {
-      switch (action) {
-        case "clear":
-          current = "0"; previous = ""; operator = null; shouldReset = false;
-          break;
-        case "delete":
-          if (current === "Error" || shouldReset) {
-            current = "0"; shouldReset = false;
-          } else {
-            current = current.length > 1 ? current.slice(0, -1) : "0";
-            if (current === "-") current = "0";
-          }
-          break;
-        case "percent":
-          if (current !== "Error") current = String(Number(current) / 100);
-          break;
-        case "sign":
-          if (current !== "0" && current !== "Error")
-            current = current.startsWith("-") ? current.slice(1) : "-" + current;
-          break;
-        case "decimal": addDecimal(); return;
-        case "equals": calculate(); return;
-      }
-      updateDisplay();
-    }
-
-    document.querySelector(".keys").addEventListener("click", (event) => {
-      const button = event.target.closest("button");
-      if (!button) return;
-      if (button.dataset.number !== undefined) addNumber(button.dataset.number);
-      if (button.dataset.operator) chooseOperator(button.dataset.operator);
-      if (button.dataset.action) handleAction(button.dataset.action);
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (/^[0-9]$/.test(event.key)) addNumber(event.key);
-      else if (event.key === ".") addDecimal();
-      else if (event.key === "+") chooseOperator("+");
-      else if (event.key === "-") chooseOperator("−");
-      else if (event.key === "*") chooseOperator("×");
-      else if (event.key === "/") { event.preventDefault(); chooseOperator("÷"); }
-      else if (event.key === "Enter" || event.key === "=") calculate();
-      else if (event.key === "Backspace") handleAction("delete");
-      else if (event.key === "Escape") handleAction("clear");
-      else if (event.key === "%") handleAction("percent");
-    });
-  </script>
 </body>
 </html>
